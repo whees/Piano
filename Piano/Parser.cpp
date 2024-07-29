@@ -16,8 +16,7 @@ void Parser::get_next_token()
 		token = lexer->tokens[cursor_pos];
 		cursor_pos++;
 	}
-		
-
+	
 	current_token = token;
 }
 

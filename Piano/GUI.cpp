@@ -6,8 +6,11 @@ GUI::GUI(int argc, char* argv[])
     int WIDTH = argc == 3 ? stoi(argv[1]) : 1000;
     int HEIGHT = argc == 3 ? stoi(argv[2]) : 1000;
 
-    clock = 0;
+    
     lexer = new Lexer();
+    parser = new Parser;
+    interpreter = new Interpreter;
+    clock = 0;
     show_cursor = true;
     TTF_Init();
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -18,13 +21,12 @@ GUI::GUI(int argc, char* argv[])
     SDL_StartTextInput();
     cursor_rect.w = 5;
     cursor_rect.h = font_size;
-    parser = new Parser;
-    interpreter = new Interpreter;
 }
 
 GUI::~GUI()
 {
-    delete lexer;
+    delete lexer, parser, interpreter;
+
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_StopTextInput();

@@ -12,19 +12,22 @@ public:
 	const int font_size = 30;
 	int clock;
 	bool show_cursor;
+	bool running = true;
+
+
 	Lexer* lexer;
+	Parser* parser;
+	Interpreter* interpreter;
+
 	TTF_Font* font;
 	TTF_Font* boldfont;
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	SDL_Rect cursor_rect;
-	Parser* parser;
-	Interpreter* interpreter;
-	
 
-	bool running = true;
 	GUI(int argc, char* argv[]);
 	~GUI();
+
 	bool work_flow();
 	void handle_events();
 	void render();
