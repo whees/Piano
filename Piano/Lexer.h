@@ -1,28 +1,27 @@
 #pragma once
 #include "Buffer.h"
-#include <vector>
+#include <ctype.h>
 #include <iostream>
 using namespace std;
 
 class Lexer
 {
 public:
-	vector<Token> tokens;
 	Buffer* buffer;
-	int cursor_pos;
-	int token_pos;
-	int word_pos;
+	int pos;
+	char current_char;
 
 	Lexer();
+	Lexer(Buffer* b);
 	~Lexer();
 
-	Token get_newline(int* pos);
-	Token get_word(int* pos);
-	Token get_space(int* pos);
-	Token get_id(int* pos);
+	Token name();
+	Token num();
+	Token get_next_token();
 
-	void lex();
-	void move_cursor_left();
-	void move_cursor_right();
-	void get_pos();
+	char peek();
+	void error();
+	void advance();
+	void skip_space();
+
 };

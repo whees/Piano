@@ -1,6 +1,2 @@
-﻿  GUI.cpp
-  Lexer.cpp
-  Parser.cpp
-  Piano.cpp
-  Generating Code...
+﻿  Interpreter.cpp
   Piano.vcxproj -> C:\Users\lcuev\Documents\Piano\x64\Debug\Piano.exe

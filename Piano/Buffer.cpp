@@ -13,7 +13,7 @@ Buffer::~Buffer()
 void Buffer::type(string newtext)
 {
 	text = text.insert(cursor_pos,newtext);
-	cursor_pos++;
+	cursor_pos+= newtext.size();
 }
 
 void Buffer::new_line()

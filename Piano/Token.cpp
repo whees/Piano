@@ -17,15 +17,13 @@ Token::~Token() {}
 
 keytokens kt = keytokens();
 
-map<string, Token> RESERVED_KEYWORDS = {	{kw.def,Token(kw.word,kw.def)},
-											{kw.base,Token(kw.word,kw.base)}, 
-											{kw.succ,Token(kw.word,kw.succ)} };
+unordered_map<string, Token> RESERVED_KEYWORDS = { {kw.show,Token(kw.show,kw.show)}};
 
-map<string, SDL_Color> SYNTAX_COLORS = {	{kw.def,kc.lavender},
-											{kw.id,kc.green },
-											{kw.base,kc.gold},
-											{kw.succ,kc.gold},
-											{kw.ref,kc.gold} };
+unordered_map<string, SDL_Color> SYNTAX_COLORS = {	{kw.name,kc.lavender },
+													{kw.num, kc.green},
+													{kw.succ,kc.lavender},
+													{kw.get,kc.lavender},
+													{kw.show,kc.gold} };
 
 
 

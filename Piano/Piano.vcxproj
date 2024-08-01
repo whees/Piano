@@ -21,6 +21,8 @@
   <ItemGroup>
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="GUI.cpp" />
+    <ClCompile Include="GUI_Lexer.cpp" />
+    <ClCompile Include="Interpreter.cpp" />
     <ClCompile Include="keycolors.cpp" />
     <ClCompile Include="keywords.cpp" />
     <ClCompile Include="Lexer.cpp" />
@@ -32,6 +34,7 @@
   <ItemGroup>
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="GUI.h" />
+    <ClInclude Include="GUI_Lexer.h" />
     <ClInclude Include="Interpreter.h" />
     <ClInclude Include="keycolors.h" />
     <ClInclude Include="keywords.h" />

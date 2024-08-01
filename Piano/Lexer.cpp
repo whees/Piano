@@ -3,9 +3,15 @@
 Lexer::Lexer()
 {
 	buffer = new Buffer();
-	cursor_pos = 0;
-	token_pos = 0;
-	word_pos = 0;
+	pos = 0;
+	current_char = buffer->text[pos];
+}
+
+Lexer::Lexer(Buffer* b)
+{
+	buffer = b;
+	pos = 0;
+	current_char = buffer->text[pos];
 }
 
 Lexer::~Lexer() 
@@ -13,156 +19,201 @@ Lexer::~Lexer()
 	delete buffer;
 }
 
-void Lexer::lex()
+void Lexer::error()
 {
-	tokens.clear();
-	int pos = 0;
+	throw invalid_argument("Invalid character.");
+}
 
-	while (pos < buffer->text.size())
+void Lexer::advance()
+{
+	if (++pos >= buffer->text.size())
+		current_char = NULL;
+	else
+		current_char = buffer->text[pos];
+}
+char Lexer::peek()
+{
+	int peek_pos = pos + 1;
+	if (peek_pos >= buffer->text.size())
+		return NULL;
+	return buffer->text[peek_pos];
+}
+
+Token Lexer::name()
+{
+	string result = "";
+
+	while (isalnum(current_char))
 	{
-		char glyph = buffer->text[pos];
-		Token token;
+		result += current_char;
+		advance();
+	}
+
+	if (RESERVED_KEYWORDS.count(result))
+		return RESERVED_KEYWORDS[result];
+
+	if (current_char == '(')
+	{
+		advance();
+		if (current_char == ')')
+		{
+			advance();
+			return Token(kw.get, result);
+		}
+		if (current_char == '+' && peek() == ')')
+		{
+			advance();
+			advance();
+			return Token(kw.succ, result);
+		}
+		if (isdigit(current_char))
+			return Token(kw.getn, result);
 		
-		switch (glyph)
+		error();
+	}
+
+	return Token(kw.name, result);
+}
+
+Token Lexer::num()
+{
+	string result = "";
+
+	while (isdigit(current_char))
+	{
+		result += current_char;
+		advance();
+	}
+
+	return Token(kw.num, result);
+}
+
+void Lexer::skip_space()
+{
+
+	while (current_char == ' ')
+		advance();
+}
+
+Token Lexer::get_next_token()
+{
+	while (current_char != NULL)
+	{
+		if (current_char == ' ')
 		{
-		case ';':
-			token = get_newline(&pos);
-			break;
-		case ' ':
-			token = get_space(&pos);
-			break;
-		case '\\':
-			token = get_id(&pos);
-			break;
-		default:
-			token = get_word(&pos);
-			break;
+			skip_space();
+			continue;
 		}
 
-		tokens.push_back(token);
-	}
-	tokens.push_back(Token(kw.eof, kw.eof));
-	get_pos();
-}
+		if (isalpha(current_char))
+			return name();
 
-Token Lexer::get_newline(int* pos)
-{
-	(*pos)++;
-	return Token(kw.newline, ";");
-}
+		if (isdigit(current_char))
+			return num();
 
-Token Lexer::get_space(int* pos)
-{
-	string space(1, buffer->text[*pos]);
-
-	while (++(*pos) < buffer->text.size())
-	{
-		if (buffer->text[*pos] != ' ')
-			break;
-		space += buffer->text[*pos];
-	}
-
-	return Token(kw.space, space);
-}
-
-Token Lexer::get_word(int* pos)
-{
-	string word(1, buffer->text[*pos]);
-	
-	while (++(*pos) < buffer->text.size())
-	{
-		if (buffer->text[*pos] == ' ' || buffer->text[*pos] == ';' || buffer->text[*pos] == ':')
-			break;
-		word += buffer->text[*pos];
-	}
-
-	if (RESERVED_KEYWORDS.count(word))
-		return RESERVED_KEYWORDS[word];
-
-	return Token(kw.word, word);
-}
-
-Token Lexer::get_id(int* pos)
-{
-	string id(1, buffer->text[*pos]);
-
-	while (++(*pos) < buffer->text.size())
-	{
-		if (buffer->text[*pos] == ' ' || buffer->text[*pos] == ';' || buffer->text[*pos] == ':')
-			break;
-		id += buffer->text[*pos];
-	}
-
-	if (id.size() == 2)
-		return Token(kw.id, id);
-	
-	return Token(kw.word, id);
-}
-
-void Lexer::get_pos()
-{
-	cursor_pos = 0;
-	token_pos = 0;
-	word_pos = 0;
-	if (!tokens.size())
-		return;
-	int pos = 0;
-
-	while(token_pos < tokens.size())
-	{
-		Token token = tokens[token_pos];
-
-		if (token.type == kw.word || token.type == kw.space || token.type == kw.newline)
+		if (current_char == '=')
 		{
-			word_pos = 0;
-			while (word_pos < token.value.size() && pos < buffer->cursor_pos)
+			advance();
+			return Token(kw.assign, "=");
+		}
+
+		if (current_char == ';')
+		{
+			advance();
+			return Token(kw.semi, ";");
+		}
+		
+		if (current_char == '+')
+		{
+			advance();
+			return Token(kw.add, "+");
+		}
+
+		if (current_char == '-')
+		{
+			advance();
+			return Token(kw.sub, "-");
+		}
+
+		if (current_char == '*')
+		{
+			advance();
+			return Token(kw.mul, "*");
+		}
+
+		if (current_char == '/')
+		{
+			advance();
+			return Token(kw.div, "/");
+		}
+
+		if (current_char == '{')
+		{
+			advance();
+			return Token(kw.lbrack, "{");
+		}
+
+		if (current_char == '}')
+		{
+			advance();
+			return Token(kw.rbrack, "}");
+		}
+
+		if (current_char == '(')
+		{
+			advance();
+
+			if (current_char == ')')
 			{
-				pos++;
-				word_pos++;
-				cursor_pos++;
+				advance();
+				return Token(kw.get, "()");
 			}
-			if (pos == buffer->cursor_pos)
-				break;
-		}
-		else if (token.type == kw.id)
-		{
-			word_pos = 0;
-			while (word_pos < token.value.size() && pos < buffer->cursor_pos)
+			if (current_char == '+' && peek() == ')')
 			{
-				pos++;
-				word_pos++;
+				advance();
+				advance();
+				return Token(kw.succ, "(+)");
 			}
 
-
-			cursor_pos++;
-
-			if (pos == buffer->cursor_pos)
-				break;
+			return Token(kw.lparen, "(");
+		}
+		
+		if (current_char == ')')
+		{
+			advance();
+			return Token(kw.rparen, ")");
 		}
 
-		token_pos++;
+		if (current_char == '|')
+		{
+			advance();
+			return Token(kw.pipe, "|");
+		}
+
+		if (current_char == ':')
+		{
+			advance();
+			return Token(kw.def, ":");
+		}
+
+		if (current_char == '^')
+		{
+			advance();
+			return Token(kw.pow, "^");
+		}
+		
+		error();
 	}
+
+	return Token(kw.eof, kw.eof);
 }
 
-void Lexer::move_cursor_left()
-{
-	int d = tokens[token_pos].type == kw.id ? 2 : 1;
-	for (int i = 0; i < d; i++)
-		buffer->move_cursor_left();
 
-}
 
-void Lexer::move_cursor_right()
-{
 
-	if (token_pos < tokens.size())
-	{
-		int d = tokens[token_pos + 1].type == kw.id ? 2 : 1;
-		for (int i = 0; i < d; i++)
-			buffer->move_cursor_right();
-	}
 
-}
+
+
 
 
 

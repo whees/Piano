@@ -2,30 +2,38 @@
 #include "Lexer.h"
 #include "Node.h"
 #include "Parser.h"
+#include <vector>
 using namespace std;
 
 
 class Parser
 {
-	int cursor_pos;
 	Lexer* lexer;
 	Token current_token;
+	vector<string> STACK;
+
 public:
 	Parser(Lexer* lexer);
-	Parser() { cursor_pos = 0; lexer = new Lexer; }
+	Parser() {}
 	
 	Node* parse();
-	void get_next_token();
 	void eat(string type);
 
 	Node* program();
 	vector<Node*> statement_list();
 	Node* statement();
 	Node* def_statement();
-	Node* binop();
+	Node* show_statement();
+	Node* empty();
 	Node* factor();
 	Node* num();
-	Node* set();
-	Node* word();
+	Node* name();
+	Set* set();
+	vector<Node*> args();
+	Node* expr();
+	Node* term();
+	Node* pow();
+
+	void error();
 };
 

@@ -3,7 +3,7 @@
 #include "SDL.h"
 #include "keywords.h"
 #include <string>
-#include <map>
+#include <unordered_map>
 using namespace std;
 
 class Token
@@ -25,7 +25,7 @@ struct keytokens
 
 
 extern keytokens kt;
-extern map<string, Token> RESERVED_KEYWORDS;
-extern map<string, SDL_Color> SYNTAX_COLORS;
+extern unordered_map<string, Token> RESERVED_KEYWORDS;
+extern unordered_map<string, SDL_Color> SYNTAX_COLORS;
 
 

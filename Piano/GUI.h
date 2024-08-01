@@ -1,6 +1,7 @@
 #pragma once
 #include "Lexer.h"
 #include "Interpreter.h"
+#include "GUI_Lexer.h"
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <iostream>
@@ -14,13 +15,13 @@ public:
 	bool show_cursor;
 	bool running = true;
 
-
+	Buffer* buffer;
 	Lexer* lexer;
+	GUI_Lexer* gui_lexer;
 	Parser* parser;
 	Interpreter* interpreter;
 
-	TTF_Font* font;
-	TTF_Font* boldfont;
+	TTF_Font* plain_font;
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	SDL_Rect cursor_rect;

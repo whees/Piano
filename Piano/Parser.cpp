@@ -2,36 +2,27 @@
 
 Parser::Parser(Lexer* l)
 {
-	cursor_pos = 0;
 	lexer = l;
-	get_next_token();
+	current_token = lexer->get_next_token();
 }
 
-void Parser::get_next_token()
+void Parser::error()
 {
-	
-	Token token = lexer->tokens[cursor_pos];
-	while (token.type == kw.space)
-	{
-		token = lexer->tokens[cursor_pos];
-		cursor_pos++;
-	}
-	
-	current_token = token;
+
 }
 
 void Parser::eat(string type)
 {
 	if (current_token.type == type)
-		get_next_token();
+		current_token = lexer->get_next_token();
 	else
-		cout << "invalid syntax" << endl;
+		error();
 }
 
 Node* Parser::program()
 {
 	vector<Node*> nodes = statement_list();
-	Node* program = new Node(kt.program);
+	Program* program = new Program();
 	for (Node* node : nodes)
 		program->append(node);
 	
@@ -42,9 +33,9 @@ vector<Node*> Parser::statement_list()
 {
 	vector<Node*> statement_list;
 	statement_list.push_back(statement());
-	while (current_token.type == kw.newline)
+	while (current_token.type == kw.semi)
 	{
-		eat(kw.newline);
+		eat(kw.semi);
 		statement_list.push_back(statement());
 	}
 
@@ -53,52 +44,102 @@ vector<Node*> Parser::statement_list()
 
 Node* Parser::statement()
 {
-	if (current_token.type == kw.def)
+	if (current_token.type == kw.name)
 		return def_statement();
-	else if (current_token.type == kw.word)
-		return word();
-	
-	return new Node;
-}
+	if (current_token.type == kw.show)
+		return show_statement();
 
-Node* Parser::word()
-{
-	eat(kw.word);
-	return new Node;
+	return empty();
 }
 
 Node* Parser::def_statement()
 {
+	Node* nam = name();
+	STACK.push_back(nam->token.value);
 	Token token = current_token;
 	eat(kw.def);
-	Node* s = set();
-	eat(kw.colon);
-	eat(kw.base);
-	Node* base = num();
-	eat(kw.succ);
-	Node* succ = binop();
-	Node* def = new Node(token);
-
-	def->append(s);
-	def->append(base);
-	def->append(succ);
-
-	return def;
+	Set* s = set();
+	Define* define = new Define(nam,s);
+	STACK.pop_back();
+	return define;
 }
 
-Node* Parser::binop()
+Node* Parser::show_statement()
 {
+	eat(kw.show);
+	eat(kw.lparen);
+	Node* arg = factor();
+	Node* show = new Show(arg);
+	eat(kw.rparen);
 
-	Node* left = factor();
-	Token token = current_token;
-	eat(token.type);
-	Node* right = factor();
-	Node* binop = new Node(token);
-	binop->append(left);
-	binop->append(right);
+	return show;
+}
 
+Node* Parser::name()
+{
+	Name* name_ = new Name(current_token);
+	eat(kw.name);
+	return name_;
+}
 
-	return binop;
+Node* Parser::num()
+{
+	Num* num_ = new Num(current_token);
+	eat(kw.num);
+	return num_;
+}
+
+vector<Node*> Parser::args()
+{
+	vector<Node*> args_;
+	args_.push_back(expr());
+
+	if (current_token.type == kw.pipe)
+	{
+		eat(kw.pipe);
+		args_.push_back(expr());
+	}
+
+	return args_;
+}
+
+Set* Parser::set()
+{
+	eat(kw.lbrack);
+	vector<Node*> arg = args();
+
+	Node* base = new Num(Token(kw.num, "0"));
+	Node* succ = new NoOp;
+	if (arg.size() == 1)
+	{
+		succ = arg[0];
+	}
+	else if (arg.size() == 2)
+	{
+		if (arg[0]->token.type == kw.num)
+		{
+			base = arg[0];
+			succ = arg[1];
+		}
+		else
+		{
+			base = arg[1];
+			succ = arg[0];
+		}
+	}
+	else
+		error();
+
+	Set* set = new Set(base,succ);
+	eat(kw.rbrack);
+	return set;
+}
+
+Node* Parser::empty()
+{
+	Node* empty = new NoOp;
+
+	return empty;
 }
 
 Node* Parser::factor()
@@ -107,27 +148,108 @@ Node* Parser::factor()
 
 	if (token.type == kw.num)
 		return num();
-	else if (token.type == kw.set)
-		return set();
-	
-	return new Node;
+	if (token.type == kw.name)
+		return name();
+	if (token.type == kw.lparen)
+	{
+		eat(kw.lparen);
+		Node* node = expr();
+		eat(kw.rparen);
+		return node;
+	}
+	if (token.type == kw.get)
+	{
+		Node* name_ = token.value == "()" ? new Self() : make_Name(token.value);
+		eat(kw.get);	
+		return new Get(name_);
+	}
+	if (token.type == kw.succ)
+	{
+		Node* name_ = token.value == "(+)" ? new Self() : make_Name(token.value);
+		eat(kw.succ);
+		return new Succ(name_);
+	}
+	if (token.type == kw.getn)
+	{
+		Node* name_ = make_Name(token.value);
+		eat(kw.getn);
+		Node* num_ = num();
+		eat(kw.rparen);
+		return new GetN(name_,num_);
+	}
+	if (token.type == kw.add)
+	{
+		eat(kw.add);
+		UnOp* unop = new UnOp(token,factor());
+
+		return unop;
+	}
+	if (token.type == kw.sub)
+	{
+		eat(kw.sub);
+		Node* unop = new UnOp(token,factor());
+
+		return unop;
+	}
+
+	error();
+	return new NoOp;
 }
 
-Node* Parser::num()
+Node* Parser::pow()
 {
-	Token token = current_token;
-	eat(kw.num);
+	Node* node = factor();
 
-	return new Node(token);
+	while (current_token.type == kw.pow)
+	{
+		Token token = current_token;
+		eat(kw.pow);
+		node = new BinOp(token, node, factor());
+		
+	}
+
+	return node;
 }
 
-Node* Parser::set()
+Node* Parser::term()
 {
-	Token token = current_token;
-	eat(kw.set);
+	Node* node = pow();
 
-	return new Node(token);
+	while (current_token.type == kw.mul || current_token.type == kw.div)
+	{
+		Token token = current_token;
+
+		if (token.type == kw.mul)
+			eat(kw.mul);
+		if (token.type == kw.div)
+			eat(kw.div);
+
+		node = new BinOp(token,node, pow());
+	}
+
+	return node;
 }
+
+Node* Parser::expr()
+{
+	Node* node = term();
+
+	while (current_token.type == kw.add || current_token.type == kw.sub)
+	{
+		Token token = current_token;
+
+		if (token.type == kw.add)
+			eat(kw.add);
+		if (token.type == kw.sub)
+			eat(kw.sub);
+
+		node = new BinOp(token, node, term());
+	}
+
+	return node;
+}
+
+
 
 Node* Parser::parse()
 {

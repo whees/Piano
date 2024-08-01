@@ -2,25 +2,34 @@
 #include <string>
 using namespace std;
 
-struct keywords
+const struct keywords
 {
-	string newline = "newline";
-	string set = "set";
-	string num = "num";
-	string add = "add";
-	string def = "def";
-	string word = "word";
-	string space = "space";
-	string null = "null";
-	string base = "-";
-	string succ = ">";
-	string ref = "|";
-	string eof = "eof";
-	string show = "show";
-	string colon = "colon";
-	string program = "program";
-	string id = "id";
 
+	string add = "+";
+	string assign = "=";
+	string base = "base";
+	string def = ":";
+	string div = "/";
+	string eof = "eof";
+	string get = "()";
+	string getn = "getn";
+	string lbrack = "{", rbrack = "}";
+	string lparen = "(", rparen = ")";
+	string mul = "*";
+	string name = "name";
+	string null = "null";
+	string num = "num";
+	string pipe = "|";
+	string pow = "^";
+	string program = "program";
+	string semi = ";";
+	string set = "set";
+	string show = "show";
+	string space = "space";
+	string sub = "sub";
+	string succ = "succ";
+	string word = "word";
+	string self = "self";
 };
 
 extern keywords kw;
