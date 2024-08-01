@@ -23,7 +23,8 @@ unordered_map<string, SDL_Color> SYNTAX_COLORS = {	{kw.name,kc.lavender },
 													{kw.num, kc.green},
 													{kw.succ,kc.lavender},
 													{kw.get,kc.lavender},
-													{kw.show,kc.gold} };
+													{kw.show,kc.gold},
+													{kw.def,kc.gold} };
 
 
 

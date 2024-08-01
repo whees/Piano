@@ -14,7 +14,7 @@ class Parser
 
 public:
 	Parser(Lexer* lexer);
-	Parser() {}
+	Parser() { lexer = nullptr; current_token = Token(kw.eof, kw.eof); }
 	
 	Node* parse();
 	void eat(string type);

@@ -67,11 +67,8 @@ Node* Parser::def_statement()
 Node* Parser::show_statement()
 {
 	eat(kw.show);
-	eat(kw.lparen);
 	Node* arg = factor();
 	Node* show = new Show(arg);
-	eat(kw.rparen);
-
 	return show;
 }
 

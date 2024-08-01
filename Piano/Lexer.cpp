@@ -2,16 +2,21 @@
 
 Lexer::Lexer()
 {
-	buffer = new Buffer();
-	pos = 0;
-	current_char = buffer->text[pos];
+	buffer = nullptr;
+	pos = NULL;
+	current_char = NULL;
 }
 
 Lexer::Lexer(Buffer* b)
 {
 	buffer = b;
 	pos = 0;
-	current_char = buffer->text[pos];
+
+	if (buffer->text.size())
+		current_char = buffer->text[pos];
+	else
+		current_char = NULL;
+	
 }
 
 Lexer::~Lexer() 

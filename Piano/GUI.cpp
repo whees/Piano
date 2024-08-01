@@ -26,7 +26,7 @@ GUI::GUI(int argc, char* argv[])
 
 GUI::~GUI()
 {
-    delete lexer, parser, interpreter, gui_lexer;
+    delete lexer, parser, interpreter, gui_lexer, buffer;
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

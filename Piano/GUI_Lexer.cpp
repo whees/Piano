@@ -7,15 +7,21 @@ GUI_Lexer::GUI_Lexer()
 	buffer = new Buffer();
 	pos = 0;
 	current_char = NULL;
-	lex();
 }
 
 GUI_Lexer::GUI_Lexer(Buffer* b)
 {
 	buffer = b;
 	pos = 0;
-	current_char = buffer->text[pos];
-	lex();
+
+	if (buffer->text.size())
+	{
+		current_char = buffer->text[pos];
+		lex();
+	}
+	else
+		current_char = NULL;
+
 }
 
 GUI_Lexer::~GUI_Lexer()
